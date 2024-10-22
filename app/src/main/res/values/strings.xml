@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">RestApi</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+    <string name="rest_api">Rest API</string>
+    <string name="add_task">Add Task</string>
+    <string name="task_description">Task Description</string>
+    <string name="task_title">Task Title</string>
+    <string name="CompletedTask">Completed Task</string>
+    <string name="choose_task_time">Choose Task Time</string>
+    <string name="task_date_time">Task Date Time</string>
+    <string name="image_upload">Upload Image</string>
+    <string name="action_button">Action</string>
+    <string name="task_actions">Task Actions :</string>
+</resources>

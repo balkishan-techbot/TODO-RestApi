@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal"
+    android:background="#DE000000"
+    android:padding="10dp">
+
+    <TextView
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/task_actions"
+        android:textColor="@color/white"
+        android:padding="10dp"
+        android:textSize="22sp" />
+
+    <LinearLayout
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_gravity="center_horizontal">
+        <!--upload image-->
+        <Button
+            android:id="@+id/imageUploadButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="@color/white"
+            android:layout_width="109dp"
+            android:textStyle="bold"
+            android:minWidth="48dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#00796B"
+            android:text="@string/image_upload"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/updateButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="109dp"
+            android:layout_height="wrap_content"
+            android:text="@string/update"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:backgroundTint="#D53E10"
+            android:minWidth="48dp" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/deleteButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="109dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/delete"
+            android:textColor="@color/white"
+            android:backgroundTint="#D32F2F"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</LinearLayout>

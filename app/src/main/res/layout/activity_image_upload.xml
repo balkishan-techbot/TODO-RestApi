@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><!-- res/layout/activity_image_upload.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#86EFEE">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/teal_700"
+        android:text="@string/image_upload"
+        android:gravity="center" />
+
+    <View
+        android:layout_width="194dp"
+        android:layout_gravity="center"
+        android:layout_height="5dp"
+        android:backgroundTint="@color/red"
+        android:layout_marginBottom="8dp"
+        android:background="?android:attr/listDivider" />
+    <!-- ImageView to preview the selected image -->
+    <ImageView
+        android:id="@+id/ivImagePreview"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:contentDescription="Uploaded Image"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/upload" />
+
+    <!-- Button to select image from the gallery -->
+    <Button
+        android:id="@+id/btnSelectImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Image"
+        android:backgroundTint="#38BDF8"
+        android:textColor="#FFFFFF" />
+
+    <!-- Button to upload the image -->
+    <Button
+        android:id="@+id/btnUploadImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Image"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#16A34A"
+        android:textColor="#FFFFFF" />
+</LinearLayout>
