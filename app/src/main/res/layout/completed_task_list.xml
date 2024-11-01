@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="#55FFFFFF"
     android:padding="4dp">
 
     <CheckBox
@@ -56,6 +57,7 @@
             android:id="@+id/taskDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="#E4E3E3"
             android:fontFamily="monospace"
             android:textSize="14sp" />
 

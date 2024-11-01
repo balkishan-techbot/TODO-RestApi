@@ -1,13 +1,17 @@
 package com.example.restapi.adapter
 
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.restapi.R
 import com.example.restapi.model.Task
 
@@ -24,6 +28,7 @@ class CompletedTaskAdapter(
         val taskTitle: TextView = itemView.findViewById(R.id.taskTitle)
         val taskDescription: TextView = itemView.findViewById(R.id.taskDescription)
         val taskTime: TextView = itemView.findViewById(R.id.taskTime)
+        val imgPreview: ImageView = itemView.findViewById(R.id.taskImg)
         val deleteButton: Button = itemView.findViewById(R.id.deleteButton)
     }
 
@@ -35,20 +40,36 @@ class CompletedTaskAdapter(
 
     override fun onBindViewHolder(holder: CompletedTaskViewHolder, position: Int) {
         val task = tasks[position]
-        holder.taskId.text = task.id.toString()
-        holder.taskTitle.text = task.title
-        holder.taskDescription.text = task.description
-        holder.taskTime.text = task.taskTime
+        holder.apply {
+            taskId.text = "${task.id}. "
+            taskTitle.text = task.title
+            taskDescription.text = task.description
+            taskTime.text = task.taskTime
+            taskStatus.apply {
+                setOnCheckedChangeListener(null)
+                isChecked = task.completed == "1"
+                setOnCheckedChangeListener { _, isChecked ->
+                    // Prevent further interaction
+                    if (alpha == 0.4f) return@setOnCheckedChangeListener
+                    task.completed = if (isChecked) "1" else "0"
+                    updateTaskStatus(task)
+                    alpha = 0.4f
+                    isClickable = false // Prevent further clicks
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        alpha = 1.0f
+                        isClickable = true // Re-enable clicks
+                    }, 2000)
+                }
+            }
+            Glide.with(holder.itemView.context)
+                .load(task.img)
+                .placeholder(R.drawable.loading) // Placeholder image
+                .error(R.drawable.loading) // Error image
+                .centerCrop()
+                .into(holder.imgPreview)
 
-        holder.taskStatus.isChecked = (task.completed == "1")
-        holder.taskStatus.setOnCheckedChangeListener(null)
-        // Handle checkbox change
-        holder.taskStatus.setOnCheckedChangeListener { _, isChecked ->
-            task.completed = if (isChecked) "1" else "0"
-            updateTaskStatus(task)
-        }
 
-        // Set delete button click listener
+            // Set delete button click listener
         holder.deleteButton.setOnClickListener {
             AlertDialog.Builder(holder.itemView.context)
                 .setTitle("Are you Sure?")
@@ -58,6 +79,7 @@ class CompletedTaskAdapter(
                 .setNegativeButton("Cancel") { dialogInterface, _ -> dialogInterface.dismiss() }
                 .show()
         }
+    }
     }
 
     override fun getItemCount(): Int {

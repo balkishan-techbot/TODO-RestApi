@@ -1,6 +1,8 @@
 package com.example.restapi
 
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
+import android.app.ProgressDialog.show
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -80,8 +82,7 @@ class MainActivity : AppCompatActivity() {
             val description = descriptionInput.text.toString().trim()
             val taskTime = taskTimeInput.text.toString()
             if (title.isNotEmpty() && description.isNotEmpty() && taskTime.isNotEmpty()) {
-                val task =
-                    Task(id = null, title = title, description = description, taskTime = taskTime)
+                val task = Task(id = null, title = title, description = description, taskTime = taskTime)
                 createTask(task)
             } else {
                 showToast("Please fill in all fields")
@@ -106,26 +107,36 @@ class MainActivity : AppCompatActivity() {
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
         }, year, month, day).show()
     }
-
+    fun Context.showLoadingDialog(): ProgressDialog {
+        return ProgressDialog(this).apply {
+            setMessage("Loading...")
+            setCancelable(false) // Prevent dismissal on back press
+            setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            show()
+        }
+    }
     private fun loadTasks() {
+        // Show loading dialog
+        val dialog = showLoadingDialog()
         Thread {
             try {
                 val response = TaskClient.taskApi.getTasks().execute()
                 runOnUiThread {
+                        dialog.dismiss()
                     if (response.isSuccessful) {
                         response.body()?.let { tasks ->
                             val incompleteTasks = tasks.filter { it.completed == "0" }
                             val completedTasks = tasks.filter { it.completed == "1" }
-
                             taskAdapter.setTasks(incompleteTasks)
                             completedTaskAdapter.setCompletedTasks(completedTasks)
                         } ?: showToast("No tasks found")
                     } else {
+
                         showToast("Failed to load tasks")
                     }
                 }
             } catch (e: Exception) {
-                runOnUiThread {
+                runOnUiThread {  dialog.dismiss()
                     showToast("Error loading tasks")
                 }
             }
@@ -134,9 +145,10 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun createTask(task: Task) {
+        val dialog = showLoadingDialog()
         Thread {
             val response = TaskClient.taskApi.createTask(task).execute()
-            runOnUiThread {
+            runOnUiThread {  dialog.dismiss()
                 if (response.isSuccessful) {
                     response.body()?.let { newTask ->
                         taskAdapter.addTask(newTask)
@@ -174,14 +186,7 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         val updatedTask = response.body()
                         if (updatedTask != null) {
-                            // Update the task in the adapter without reloading
-                            if (task.completed == "1") {
-                                taskAdapter.removeTask(updatedTask)
-                                completedTaskAdapter.addTask(task)
-                            } else {
-                                taskAdapter.addTask(updatedTask)
-                                completedTaskAdapter.removeTask(task)
-                            }
+                            loadTasks()
                             showToast("Task status updated successfully")
                         } else {
                             showToast("Failed to update task status")

@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="4dp"
+    android:layout_marginVertical="2dp"
+    android:background="#55FFFFFF"
     android:orientation="vertical">
 
     <LinearLayout
@@ -70,6 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
+                android:textColor="#E4E3E3"
                 android:textSize="14sp" />
 
             <!-- Task Time -->
@@ -79,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
                 android:textSize="12sp"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 

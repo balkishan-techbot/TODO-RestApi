@@ -1,7 +1,9 @@
 package com.example.restapi
 
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -74,6 +76,14 @@ class UpdateTaskActivity : AppCompatActivity() {
         }, year, month, day).show()
     }
 
+    fun Context.showLoadingDialog(): ProgressDialog {
+        return ProgressDialog(this).apply {
+            setMessage("Loading...")
+            setCancelable(false) // Prevent dismissal on back press
+            setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            show()
+        }
+    }
     private fun updateTask() {
         // Ensure taskId is valid
         if (taskId != null && taskId!! >= 0) {
@@ -86,8 +96,9 @@ class UpdateTaskActivity : AppCompatActivity() {
 
             // Call your Retrofit API to update the task using PUT
             TaskClient.taskApi.updateTask(updatedTask.id ?: -1, updatedTask)
-                .enqueue(object : Callback<Task> {
+                .enqueue(object : Callback<Task> { val dialog = showLoadingDialog()
                     override fun onResponse(call: Call<Task>, response: Response<Task>) {
+                        dialog.dismiss()
                         if (response.isSuccessful) {
                             // Pass updated data back to the previous activity
                             val resultIntent = Intent().apply {
@@ -103,6 +114,7 @@ class UpdateTaskActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(call: Call<Task>, t: Throwable) {
+                        dialog.dismiss()
                         showToast("Error: ${t.message}")
                     }
                 })
