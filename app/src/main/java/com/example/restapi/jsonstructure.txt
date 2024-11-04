@@ -1,0 +1,33 @@
+{
+ working_date: 12-10-2024,
+ start_work_time: date_time,  10:12:13
+ end_work_time: date_time,
+ total_working_hours: 12:21,
+ descripton: 'app closes by user',
+ break: {
+    total_break_time: 3,
+    breaks : [
+        {
+            break_title: Lunch,
+            break_description: 'sdf',
+            break_start_time: date_time,
+            break_end_time: date_time,
+            total_break_hour: 0.30 hour
+        },{
+
+            break_title: Lunch,
+            break_description: 'sdf',
+            break_start_time: date_time,
+            break_end_time: date_time,
+            total_break_hour: 1.30 hour
+        },{
+
+            break_title: Lunch,
+            break_description: 'sdf',
+            break_start_time: date_time,
+            break_end_time: date_time,
+            total_break_hour: 1 hour
+        }
+    ]
+ }
+}

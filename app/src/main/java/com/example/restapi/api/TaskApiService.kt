@@ -2,13 +2,14 @@ package com.example.restapi.api
 
 import com.example.restapi.model.Task
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
 interface TaskApiService {
 
     // Retrieve all tasks
     @GET("tasks")
-    fun getTasks(): Call<List<Task>>
+    suspend fun getTasks(): Response<List<Task>>
 
     // Retrieve a specific task by ID
     @GET("tasks/{id}")
@@ -16,17 +17,17 @@ interface TaskApiService {
 
     // Create a new task
     @POST("tasks/hello-tasks/store")
-    fun createTask(@Body task: Task): Call<Task>
+    suspend fun createTask(@Body task: Task): Response<Task>
 
     // Update a specific task (PUT)
     @PUT("tasks/{id}")
-    fun updateTask(@Path("id") id: Int, @Body task: Task): Call<Task>
+    suspend fun updateTask(@Path("id") id: Int, @Body task: Task): Response<Task>
 
     // Update a specific task (PATCH)
     @PATCH("tasks/{id}")
-    fun patchTask(@Path("id") id: Int, @Body task: Task): Call<Task>
+    suspend fun patchTask(@Path("id") id: Int, @Body task: Task):Response<Task>
 
     // Delete a specific task
     @DELETE("tasks/{id}")
-    fun deleteTask(@Path("id") id: Int): Call<Unit>
+    suspend fun deleteTask(@Path("id") id: Int): Response<Unit>
 }

@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?><!-- res/layout/activity_image_upload.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#EE101212">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#EE101212">
+    >
 
     <TextView
         android:layout_width="match_parent"
@@ -45,3 +50,4 @@
         android:backgroundTint="#16A34A"
         android:textColor="#FFFFFF" />
 </LinearLayout>
+</ScrollView>

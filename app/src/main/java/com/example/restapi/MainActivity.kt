@@ -2,7 +2,6 @@ package com.example.restapi
 
 import android.app.DatePickerDialog
 import android.app.ProgressDialog
-import android.app.ProgressDialog.show
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -14,12 +13,14 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.restapi.adapter.CompletedTaskAdapter
 import com.example.restapi.adapter.TaskAdapter
 import com.example.restapi.api.TaskClient
 import com.example.restapi.model.Task
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
         }, year, month, day).show()
     }
-    fun Context.showLoadingDialog(): ProgressDialog {
+    private fun Context.showLoadingDialog(): ProgressDialog {
         return ProgressDialog(this).apply {
             setMessage("Loading...")
             setCancelable(false) // Prevent dismissal on back press
@@ -118,38 +119,41 @@ class MainActivity : AppCompatActivity() {
     private fun loadTasks() {
         // Show loading dialog
         val dialog = showLoadingDialog()
-        Thread {
-            try {
-                val response = TaskClient.taskApi.getTasks().execute()
-                runOnUiThread {
-                        dialog.dismiss()
-                    if (response.isSuccessful) {
-                        response.body()?.let { tasks ->
-                            val incompleteTasks = tasks.filter { it.completed == "0" }
-                            val completedTasks = tasks.filter { it.completed == "1" }
-                            taskAdapter.setTasks(incompleteTasks)
-                            completedTaskAdapter.setCompletedTasks(completedTasks)
-                        } ?: showToast("No tasks found")
-                    } else {
 
-                        showToast("Failed to load tasks")
-                    }
+        lifecycleScope.launch {
+            try {
+                val response = TaskClient.taskApi.getTasks()
+
+                // Dismiss the loading dialog
+                dialog.dismiss()
+
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        val incompleteTasks = tasks.filter { it.completed == "0" }
+                        val completedTasks = tasks.filter { it.completed == "1" }
+                        taskAdapter.setTasks(incompleteTasks)
+                        completedTaskAdapter.setCompletedTasks(completedTasks)
+                    } ?: showToast("No tasks found")
+                } else {
+                    showToast("Failed to load tasks")
                 }
             } catch (e: Exception) {
-                runOnUiThread {  dialog.dismiss()
-                    showToast("Error loading tasks")
-                }
+                // Dismiss the loading dialog in case of an error
+                dialog.dismiss()
+                showToast("Error loading tasks: ${e.message}")
             }
-        }.start()
+        }
     }
 
 
     private fun createTask(task: Task) {
         val dialog = showLoadingDialog()
-        Thread {
-            val response = TaskClient.taskApi.createTask(task).execute()
-            runOnUiThread {  dialog.dismiss()
-                if (response.isSuccessful) {
+        lifecycleScope.launch {
+                val response = TaskClient.taskApi.createTask(task)
+                // Dismiss the loading dialog
+                dialog.dismiss()
+
+            if (response.isSuccessful) {
                     response.body()?.let { newTask ->
                         taskAdapter.addTask(newTask)
                         showToast("Task created")
@@ -159,13 +163,13 @@ class MainActivity : AppCompatActivity() {
                     showToast("Failed to create task")
                 }
             }
-        }.start()
     }
 
     private fun deleteTask(task: Task) {
-        Thread {
-            val response = TaskClient.taskApi.deleteTask(task.id ?: -1).execute()
-            runOnUiThread {
+        lifecycleScope.launch {
+            try {
+                // Call the deleteTask API function
+                val response = TaskClient.taskApi.deleteTask(task.id ?: -1)
                 if (response.isSuccessful) {
                     taskAdapter.removeTask(task)
                     completedTaskAdapter.removeTask(task)
@@ -173,20 +177,21 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     showToast("Failed to delete task")
                 }
+            } catch (e: Exception) {
+                showToast("Error deleting task: ${e.message}")
             }
-        }.start()
+        }
     }
 
     private fun updateTaskStatus(task: Task) {
-        // Synchronize to prevent multiple clicks causing concurrent modifications
-        synchronized(this) {
-            Thread {
-                val response = TaskClient.taskApi.updateTask(task.id ?: -1, task).execute()
-                runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    // Call the API to update the task
+                    val response = TaskClient.taskApi.updateTask(task.id ?: -1, task)
                     if (response.isSuccessful) {
                         val updatedTask = response.body()
                         if (updatedTask != null) {
-                            loadTasks()
+                            loadTasks() // Reload tasks to reflect the updated status
                             showToast("Task status updated successfully")
                         } else {
                             showToast("Failed to update task status")
@@ -194,10 +199,11 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         showToast("Something went wrong. Please try again.")
                     }
+                } catch (e: Exception) {
+                    showToast("Error updating task status: ${e.message}")
                 }
-            }.start()
+            }
         }
-    }
 
 
     private fun imageUpload(taskId: Int) {

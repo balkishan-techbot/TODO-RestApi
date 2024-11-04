@@ -10,16 +10,14 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.restapi.api.ImageClient
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
 
 class ImageUploadActivity : AppCompatActivity() {
@@ -90,30 +88,23 @@ class ImageUploadActivity : AppCompatActivity() {
             // Convert taskId to RequestBody in the correct way for newer versions
             val taskIdPart = RequestBody.create("text/plain".toMediaTypeOrNull(), taskId.toString())
 
-            // Make the network call to upload the image with task ID
-            ImageClient.imageApi.uploadImage(imagePart, taskIdPart)
-                .enqueue(object : Callback<ResponseBody> {
-                    override fun onResponse(
-                        call: Call<ResponseBody>,
-                        response: Response<ResponseBody>,
-                    ) {
-                        if (response.isSuccessful) {
-                            showToast("Image uploaded successfully!")
-                            setResult(RESULT_OK) // Indicate success
-                        } else {
-                            showToast("Failed to upload image")
-                        }
-                    }
+            lifecycleScope.launch {
+                try {
+                    // Make the network call to upload the image with task ID
+                    val response = ImageClient.imageApi.uploadImage(imagePart, taskIdPart)
 
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        showToast("Upload failed: ${t.message}")
+                    if (response.isSuccessful) {
+                        showToast("Image uploaded successfully!")
+                        setResult(RESULT_OK) // Indicate success
+                        finish() // Optionally close the activity or handle success
+                    } else {
+                        showToast("Failed to upload image")
                     }
-                })
-        } else {
-            showToast("Failed to retrieve file path")
-        }
-    }
-
+                } catch (e: Exception) {
+                    showToast("Upload failed: ${e.message}")
+                }
+            }
+        }}
     // Function to retrieve the real file path from content URI
     private fun getRealPathFromURI(contentUri: Uri): String? {
         val cursor = contentResolver.query(
