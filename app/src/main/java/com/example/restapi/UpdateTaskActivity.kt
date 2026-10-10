@@ -1,7 +1,9 @@
 package com.example.restapi
 
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,15 +12,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.restapi.api.TaskClient
 import com.example.restapi.model.Task
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-
 
 class UpdateTaskActivity : AppCompatActivity() {
     private lateinit var titleInput: EditText
@@ -74,6 +74,14 @@ class UpdateTaskActivity : AppCompatActivity() {
         }, year, month, day).show()
     }
 
+    private fun Context.showLoadingDialog(): ProgressDialog {
+        return ProgressDialog(this).apply {
+            setMessage("Loading...")
+            setCancelable(false) // Prevent dismissal on back press
+            setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            show()
+        }
+    }
     private fun updateTask() {
         // Ensure taskId is valid
         if (taskId != null && taskId!! >= 0) {
@@ -83,31 +91,35 @@ class UpdateTaskActivity : AppCompatActivity() {
                 description = descriptionInput.text.toString(),
                 taskTime = taskTimeInput.text.toString()
             )
+            val dialog = showLoadingDialog()
+            lifecycleScope.launch {
+                try {
+                    // Call the API to update the task
+                    val response = TaskClient.taskApi.updateTask(updatedTask.id ?: -1, updatedTask)
 
-            // Call your Retrofit API to update the task using PUT
-            TaskClient.taskApi.updateTask(updatedTask.id ?: -1, updatedTask)
-                .enqueue(object : Callback<Task> {
-                    override fun onResponse(call: Call<Task>, response: Response<Task>) {
-                        if (response.isSuccessful) {
-                            // Pass updated data back to the previous activity
-                            val resultIntent = Intent().apply {
-                                putExtra("UPDATED_TITLE", updatedTask.title)
-                                putExtra("UPDATED_DESCRIPTION", updatedTask.description)
-                                putExtra("UPDATED_TIME", updatedTask.taskTime)
-                            }
-                            setResult(RESULT_OK, resultIntent) // Send updated data back
-                            finish() // Close activity on success
-                        } else {
-                            showToast("Failed to update task")
+                    // Dismiss the loading dialog
+                    dialog.dismiss()
+
+                    if (response.isSuccessful) {
+                        // Pass updated data back to the previous activity
+                        val resultIntent = Intent().apply {
+                            putExtra("UPDATED_TITLE", updatedTask.title)
+                            putExtra("UPDATED_DESCRIPTION", updatedTask.description)
+                            putExtra("UPDATED_TIME", updatedTask.taskTime)
                         }
+                        setResult(RESULT_OK, resultIntent) // Send updated data back
+                        finish() // Close activity on success
+                    } else {
+                        showToast("Failed to update task")
                     }
-
-                    override fun onFailure(call: Call<Task>, t: Throwable) {
-                        showToast("Error: ${t.message}")
-                    }
-                })
+                } catch (e: Exception) {
+                    // Dismiss the loading dialog in case of an error
+                    dialog.dismiss()
+                    showToast("Error updating task: ${e.message}")
+                }
+            }
         } else {
-            showToast("Invalid Task ID")
+            showToast("Invalid Task Selected")
         }
     }
 
@@ -120,21 +132,26 @@ class UpdateTaskActivity : AppCompatActivity() {
                 description = descriptionInput.text.toString(),
                 taskTime = taskTimeInput.text.toString()
             )
-
-            TaskClient.taskApi.patchTask(taskId!!, taskUpdate).enqueue(object : Callback<Task> {
-                override fun onResponse(call: Call<Task>, response: Response<Task>) {
+            lifecycleScope.launch {
+                try {
+                    // Call the API to update the task
+                    val response = TaskClient.taskApi.patchTask(taskId!!, taskUpdate)
                     if (response.isSuccessful) {
-                        showToast("Task updated")
+                        // Pass updated data back to the previous activity
+                        val resultIntent = Intent().apply {
+                            putExtra("UPDATED_TITLE", taskUpdate.title)
+                            putExtra("UPDATED_DESCRIPTION", taskUpdate.description)
+                            putExtra("UPDATED_TIME", taskUpdate.taskTime)
+                        }
+                        setResult(RESULT_OK, resultIntent) // Send updated data back
+                        finish() // Close activity on success
                     } else {
                         showToast("Failed to update task")
                     }
+                }catch (e: Exception) {
+                    showToast("Error updating task: ${e.message}")
                 }
-
-                override fun onFailure(call: Call<Task>, t: Throwable) {
-                    showToast("Error: ${t.message}")
-                }
-            })
-        } else {
+        }} else {
             showToast("Invalid Task ID")
         }
     }
